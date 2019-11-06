@@ -8,7 +8,7 @@ int main() {
 
 	//const float G=1.0, M=1.0, AU=1.0, SecYear=1.0;
 	//const float G=6.67e-11, M=2.0e30, AU=1.5e11, SecYear=3.154e7; // real constants
-	const float GM = 4*M_PI*M_PI; //derived from Kepler's Laws
+	const float GM = 4*M_PI*M_PI, M=2.0e30; //derived from Kepler's Laws
 	int nIter = 1000,i,numOrb=0; //number of iterations per circle, loop iterator, number of orbits
 	float tempY; //for number of orbits
 	float dt = 0.01; //time step
