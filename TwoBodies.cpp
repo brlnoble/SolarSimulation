@@ -36,8 +36,7 @@ int main() {
 	
 	obj[0].aY = 0.0;
 	obj[0].aX = -G*M/(obj[0].R*obj[0].R);
-	obj[0].Vt = sqrt(G*M/(obj[0].R)); //finds tangential in m/s
-	obj[0].Vy = obj[0].Vt;
+	obj[0].Vy = sqrt(G*M/(obj[0].R)); //finds tangential in m/s
 	obj[0].Vx = 0.0;
 	
 	dx = obj[1].X-obj[0].X; //find radius between objects
@@ -46,7 +45,6 @@ int main() {
 	
 	obj[1].aY = 0.0;
 	obj[1].aX = G*obj[0].m/(obj[1].R*obj[1].R);//-G*obj[0].m/(obj[1].R*obj[1].R*obj[1].R)*dx;
-	obj[1].Vt = 0.0;
 	obj[1].Vx = 0.0;
 	obj[1].Vy = -(obj[0].m/obj[1].m)*obj[0].Vy; //base speed of sun off of planet speed, proportional to mass diference
 	
@@ -55,10 +53,7 @@ int main() {
 	cpgsci(1); //white
 	cpgpt(1,&obj[0].X,&obj[0].Y,2); //draw starting position marker
 	
-	std::cout <<"\n###########Calculated Properties###########\nR = " <<obj[0].R << "AU\t\tR = "<<obj[1].R<<"\n";
-	std::cout <<"vT = " <<obj[0].Vt << "\t\tvT = "<<obj[1].Vt<<"\n";
-	std::cout <<"Ax = " <<obj[0].aX <<", Ay = "<<obj[0].aY<<"\t\tAx = "<<obj[1].aX<<", Ay = "<<obj[1].aY<<"\n";
-	std::cout <<"dt: " << dt << "\n";
+	//std::cout <<"\n###########Calculated Properties###########\nR = " <<obj[0].R << "AU\t\tR = "<<obj[1].R<<"\n";
 	
 	tempY=obj[0].Y;
 	//#####Loop Calculations#####
