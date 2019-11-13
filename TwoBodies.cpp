@@ -12,23 +12,23 @@ int main() {
 	int nIter = 1000,i,j,k,numOrb=0,N=2; //number of iterations per circle, loop iterator, number of orbits
 	float tempY; //for number of orbits
 	float dt = 0.01; //time step
-	float dx,dy;
+	float dx,dy,a;
 
 	//#####Set up plot window#####
 	if(!cpgopen("/XWINDOW")) return 1; //open window
 	cpgenv(-10,10,-10,10,1,0); //sets up axes
 	cpglab("x (AU)","y (AU)","Jupiter Orbiting the Sun");
 	
-	//#####Set up planet variables####
+	//#####Initial Conditions#####
+	
 	celestial obj[N]; //make planet and sun objects
-	
-	
-	//#####Initial Calculations###### (modelled after Sun/Jupiter system)
-	
-	obj[0].X = 5.0; //initial positions
+
+	obj[0].X = 5.0;
 	obj[0].Y = 0.0;
-	obj[1].X = -2.0;
+	obj[0].m = 0.1*M;
+	obj[1].X = 0.0;
 	obj[1].Y = 0.0;
+	obj[1].m = 1.0*M;
 	
 	dx = obj[0].X-obj[1].X; //find radius between objects
 	dy = obj[0].Y-obj[1].Y;
@@ -39,18 +39,16 @@ int main() {
 	obj[0].Vt = sqrt(G*M/(obj[0].R)); //finds tangential in m/s
 	obj[0].Vy = obj[0].Vt;
 	obj[0].Vx = 0.0;
-	obj[0].m = 0.01;
 	
 	dx = obj[1].X-obj[0].X; //find radius between objects
 	dy = obj[1].Y-obj[0].Y;
 	obj[1].R = sqrt( dx*dx + dy*dy );
 	
 	obj[1].aY = 0.0;
-	obj[1].aX = -G*obj[0].m/(obj[1].R*obj[1].R*obj[1].R)*dx;
+	obj[1].aX = G*obj[0].m/(obj[1].R*obj[1].R);//-G*obj[0].m/(obj[1].R*obj[1].R*obj[1].R)*dx;
 	obj[1].Vt = 0.0;
 	obj[1].Vx = 0.0;
-	obj[1].Vy = 0.0;
-	obj[1].m = 1.0;
+	obj[1].Vy = -(obj[0].m/obj[1].m)*obj[0].Vy; //base speed of sun off of planet speed, proportional to mass diference
 	
 	cpgsci(7); //yellow
 	cpgpt(1,&obj[1].X,&obj[1].Y,2); //draw star orbit position
@@ -76,10 +74,14 @@ int main() {
 				
 				dx = obj[j].X-obj[k].X;
 				dy = obj[j].Y-obj[k].Y;
+				
+				
 				obj[j].R = sqrt( dx*dx + dy*dy );
 				
-				obj[j].aX = -G*obj[k].m*(dx)/(obj[j].R*obj[j].R*obj[j].R);
-				obj[j].aY = -G*obj[k].m*(dy)/(obj[j].R*obj[j].R*obj[j].R);
+				a = -G*obj[k].m/(obj[j].R*obj[j].R);
+				
+				obj[j].aX = a * dx / obj[j].R;
+				obj[j].aY = a * dy / obj[j].R;
 				
 				obj[j].Vx += obj[j].aX*dt;
 				obj[j].Vy += obj[j].aY*dt;
@@ -93,12 +95,12 @@ int main() {
 		cpgpt(1,&obj[1].X,&obj[1].Y,1); //draw star orbit position
 		cpgsci(6); //white
 		cpgpt(1,&obj[0].X,&obj[0].Y,1); //draw starting position marker
-		//usleep(50); //slows program to show progression of orbit
+		usleep(500); //slows program to show progression of orbit
 		if(obj[0].Y>=0.0&&tempY<0.0) { //counts and prints the number of orbits
 			numOrb++;
 			std::cout<<"Orbits: "<<numOrb<<"\n";
 		}
 		tempY=obj[0].Y;
 	}
-	cpgclos(); //pause before closing, require user to return to close plot
+	cpgclos(); //pause, require user to return to close plot
 }
