@@ -17,45 +17,40 @@ int main() {
 	//#####Set up plot window#####
 	if(!cpgopen("/XWINDOW")) return 1; //open window
 	cpgenv(-10,10,-10,10,1,0); //sets up axes
-	cpglab("x (AU)","y (AU)","Jupiter Orbiting the Sun");
+	cpglab("x (AU)","y (AU)","Binary System, 1*M and 0.5*M");
 	
 	//#####Initial Conditions#####
 	
 	celestial obj[N]; //make planet and sun objects
 
-	obj[0].X = 5.0;
+	obj[0].X = 0.0;
 	obj[0].Y = 0.0;
-	obj[0].m = 0.1*M;
-	obj[1].X = 0.0;
+	obj[0].m = 1.0*M;
+	
+	obj[1].X = 5.0;
 	obj[1].Y = 0.0;
-	obj[1].m = 1.0*M;
+	obj[1].m = 0.50*M;
 	
-	dx = obj[0].X-obj[1].X; //find radius between objects
-	dy = obj[0].Y-obj[1].Y;
-	obj[0].R = sqrt( dx*dx + dy*dy );
-	
-	obj[0].aY = 0.0;
-	obj[0].aX = -G*M/(obj[0].R*obj[0].R);
-	obj[0].Vy = sqrt(G*M/(obj[0].R)); //finds tangential in m/s
-	obj[0].Vx = 0.0;
 	
 	dx = obj[1].X-obj[0].X; //find radius between objects
 	dy = obj[1].Y-obj[0].Y;
 	obj[1].R = sqrt( dx*dx + dy*dy );
-	
-	obj[1].aY = 0.0;
-	obj[1].aX = G*obj[0].m/(obj[1].R*obj[1].R);//-G*obj[0].m/(obj[1].R*obj[1].R*obj[1].R)*dx;
+	obj[1].Vy = sqrt(G*M/(obj[1].R)); //finds tangential in m/s
 	obj[1].Vx = 0.0;
-	obj[1].Vy = -(obj[0].m/obj[1].m)*obj[0].Vy; //base speed of sun off of planet speed, proportional to mass diference
 	
-	cpgsci(7); //yellow
-	cpgpt(1,&obj[1].X,&obj[1].Y,2); //draw star orbit position
-	cpgsci(1); //white
-	cpgpt(1,&obj[0].X,&obj[0].Y,2); //draw starting position marker
+	dx = obj[0].X-obj[1].X; //find radius between objects
+	dy = obj[0].Y-obj[1].Y;
+	obj[0].R = sqrt( dx*dx + dy*dy );
+	obj[0].Vx = 0.0;
+	obj[0].Vy = -(obj[1].m/obj[0].m)*obj[1].Vy; //base speed of sun off of planet speed, proportional to mass diference
+	
+	cpgsci(1); //yellow
+	cpgpt(1,&obj[0].X,&obj[0].Y,2); //draw star orbit position
+	cpgpt(1,&obj[1].X,&obj[1].Y,2); //draw starting position marker
 	
 	//std::cout <<"\n###########Calculated Properties###########\nR = " <<obj[0].R << "AU\t\tR = "<<obj[1].R<<"\n";
 	
-	tempY=obj[0].Y;
+	tempY=obj[1].Y;
 	//#####Loop Calculations#####
 	for(i=0; i<10000000; i++) { //using leapfrog method to calculate orbit
 		for(j=0;j<N;j++) { //pick body affected
@@ -87,15 +82,15 @@ int main() {
 		}
 		//std::cout<<"Ax: "<<obj[1].aX<<" Ay: "<<obj[1].aY<<"\n";
 		cpgsci(7); //yellow
-		cpgpt(1,&obj[1].X,&obj[1].Y,1); //draw star orbit position
-		cpgsci(6); //white
-		cpgpt(1,&obj[0].X,&obj[0].Y,1); //draw starting position marker
-		usleep(500); //slows program to show progression of orbit
-		if(obj[0].Y>=0.0&&tempY<0.0) { //counts and prints the number of orbits
+		cpgpt(1,&obj[0].X,&obj[0].Y,1); //draw star orbit position
+		cpgsci(6); //purple
+		cpgpt(1,&obj[1].X,&obj[1].Y,1); //draw starting position marker
+		//usleep(500); //slows program to show progression of orbit
+		if(obj[1].Y>=0.0&&tempY<0.0) { //counts and prints the number of orbits
 			numOrb++;
 			std::cout<<"Orbits: "<<numOrb<<"\n";
 		}
-		tempY=obj[0].Y;
+		tempY=obj[1].Y;
 	}
 	cpgclos(); //pause, require user to return to close plot
 }
