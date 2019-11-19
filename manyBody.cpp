@@ -14,12 +14,12 @@ int main() {
 	const float G=1.0, M=1.0;
 	//const float G=6.67e-11, M=2.0e30, AU=1.5e11, SecYear=3.154e7; // real constants
 	//const float GM = 4*M_PI*M_PI, M=2.0e30; //derived from Kepler's Laws
-	int nIter = 1000,i,j,k,numOrb=0,N=3; //number of iterations per circle, loop iterator, number of orbits
+	int nIter = 1000,i,j,k,numOrb=0,N=10; //number of iterations per circle, loop iterator, number of orbits
 	float tempY; //for number of orbits
 	float dt = 0.01; //time step
 	float dx,dy,a;
 	float e = 0.01; //offset to try and avoid slingshotting
-	float scale = 10.0; //scale of graph
+	float scale = 60.0; //scale of graph
 
 	//##### Set up plot window #####
 	if(!cpgopen("/XWINDOW")) return 1; //open window
@@ -39,10 +39,14 @@ int main() {
 	for(i=1; i<N; i++) {
 		obj[i].m = Random(0.5, 3.0);
 		obj[i].updateCol();
-		obj[i].X = Random(0.0, 8.0);
-		obj[i].Y = Random(1.0, 5.0);
-		obj[i].Vx = Random(-0.01, 0.02);
-		obj[i].Vy = Random(-0.01, 0.02);
+		obj[i].X = Random(-8.0, 8.0);
+		obj[i].Y = Random(-0.0, 0.0);
+		//obj[i].Vx = Random(-0.01, 0.02);
+		//obj[i].Vy = Random(-4.0, -1.0);
+		dx = obj[i].X-obj[0].X; //first body
+		dy = obj[i].Y-obj[0].Y;
+		obj[i].Vy = 0.5*sqrt(G*obj[0].m/sqrt(dx*dx+e*e))*dx/sqrt(dx*dx+e*e);
+		obj[i].Vx = -0.5*sqrt(G*obj[0].m/sqrt(dy*dy+e*e))*dy/sqrt(dy*dy+e*e);
 		cout<<"Body "<<i<<"\n\tm: "<<obj[i].m<<"\n\tX,Y: "<<obj[i].X<<","<<obj[i].Y<<"\n\tVx,Vy: "<<obj[i].Vx<<","<<obj[i].Vy<<"\n";
 		cpgpt(1,&obj[i].X,&obj[i].Y,2);
 	}
@@ -50,7 +54,7 @@ int main() {
 	//##### Loop calculations ######
 	for(i=0; i<10000000; i++) { //using leapfrog method to calculate orbit
 		for(j=1;j<N;j++) { //pick body affected
-			for(k=0;k<1;k++) { //pick body acting on selected one
+			for(k=0;k<N;k++) { //pick body acting on selected one
 				if(j==k) continue; //skip itself
 				//Leapfrog with position first
 				
@@ -63,7 +67,7 @@ int main() {
 				
 				obj[j].R = sqrt( e*e + dx*dx + dy*dy ); //add e^e to prevent R from being zero, prevents slingshotting
 				
-				a = -G*obj[k].m/(obj[j].R*obj[j].R);
+				a = -G*(obj[k].m/obj[j].m)/(obj[j].R*obj[j].R);
 				
 				obj[j].aX = a * dx / obj[j].R;
 				obj[j].aY = a * dy / obj[j].R;
@@ -74,9 +78,11 @@ int main() {
 				obj[j].X += (dt/2)*obj[j].Vx;
 				obj[j].Y += (dt/2)*obj[j].Vy;
 			} //END CALCULATION GROUP
-		} //END BODY CHOOSING LOOP
+		//cpgeras();
 		cpgsci(obj[j].colour); //follows colour of the given body
 		cpgpt(1,&obj[j].X,&obj[j].Y,1); //draw the current position as a point
+		} //END BODY CHOOSING LOOP
+		usleep(500);
 	} //END MAIN LOOP
 }
 
