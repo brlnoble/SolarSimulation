@@ -18,5 +18,5 @@ Work to do:
 - [ ] Galaxy of N > 1000
 - [ ] Galaxy of N = 1 000 000
 
-Current progress is a small galaxy with ~10 objects in orbit around a supermassive black hole. 
+Current progress is a small galaxy with ~10 objects in orbit around a supermassive black hole. Red is small mass stars, yellow is medium sized ones. The graph draws the orbits with individual points, a farther spread means a faster speed.
 ![November 20th Progress](https://github.com/brlnoble/SolarSimulation/blob/master/November_20_2019.PNG?raw=true)
