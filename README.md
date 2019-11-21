@@ -13,10 +13,11 @@ Work to do:
 - [ ] Proper generator for initial conditions of velocity - *Working on*
 - [x] More advanced class with star colour depedent on mass, ect.
 - [ ] Collision handling between bodies - *Working on*
+- [ ] Implementation of dark halo - *Working on*
 - [ ] Advanced plotting using Python and matplotlib
 - [ ] Implementation of Barnes-Hut approximation to simply calculations
 - [ ] Galaxy of N > 1000
 - [ ] Galaxy of N = 1 000 000
 
-Current progress is a small galaxy with ~10 objects in orbit around a supermassive black hole. Red is small mass stars, yellow is medium sized ones. The graph draws the orbits with individual points, a farther spread means a faster speed.
+Current progress is a small galaxy with ~30 objects in orbit around a supermassive black hole. Red is small mass stars, yellow is medium sized ones. The graph draws the orbits with individual points, currently showing the supermassive black hole at the center as purple.
 ![November 21st Progress](https://github.com/brlnoble/SolarSimulation/blob/master/November_21_2019.PNG?raw=true)
