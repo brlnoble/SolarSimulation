@@ -14,19 +14,17 @@ int main() {
 	const float G=1.0, M=1.0;
 	//const float G=6.67e-11, M=2.0e30, AU=1.5e11, SecYear=3.154e7; // real constants
 	//const float GM = 4*M_PI*M_PI, M=2.0e30; //derived from Kepler's Laws
-	int nIter = 1000,i,j,k,numOrb=0,N=10; //number of iterations per circle, loop iterator, number of orbits
+	int nIter = 1000,i,j,k,numOrb=0,N=30; //number of iterations per circle, loop iterator, number of orbits
 	float tempY; //for number of orbits
-	float dt = 0.01; //time step
+	float dt = 0.001; //time step
 	float dx,dy,a;
-	float e = 0.01; //offset to try and avoid slingshotting
-	float scale = 15.0; //scale of graph
+	float e = 0.001; //offset to avoid zero division
+	float scale = 200.0; //scale of graph
 
 	//##### Set up plot window #####
 	if(!cpgopen("/XWINDOW")) return 1; //open window
 	cpgenv(-scale,scale,-scale,scale,1,0); //sets up axes
 	cpglab("x (AU)","y (AU)","Galaxy System Test");
-	
-	cpgsci(1);
 	
 	//###### Set up Initial Conditions Here #####
 	
@@ -37,29 +35,36 @@ int main() {
 	obj[0].Y = 0.0;
 	obj[0].state = true;
 	
+	cpgsci(6);
+	cpgpt(1, &obj[0].X, &obj[0].Y,23);
+	cpgsci(1);
+	
 	for(i=1; i<N; i++) {
 		obj[i].state = true;
-		obj[i].m = Random(0.5, 3.0);
+		obj[i].m = Random(0.25, 3.0);
 		obj[i].updateCol();
-		obj[i].X = Random(-8.0, 8.0);
-		obj[i].Y = Random(-0.0, 0.0);
-		//obj[i].Vx = Random(-0.01, 0.02);
-		//obj[i].Vy = Random(-4.0, -1.0);
+		obj[i].X = Random(-100.0, 100.0);
+		obj[i].Y = Random(-100.0, 100.0);
+		obj[i].Vx = Random(0.10, 0.15); //variation in velocitiese, also corrects for exceptionally high initial conditions
+		obj[i].Vy = Random(0.10, 0.15);
 		dx = obj[i].X-obj[0].X; //first body
 		dy = obj[i].Y-obj[0].Y;
-		obj[i].Vy = 0.25*sqrt(G*obj[0].m/sqrt(dx*dx+e*e))*dx/sqrt(dx*dx+e*e);
-		obj[i].Vx = -0.25*sqrt(G*obj[0].m/sqrt(dy*dy+e*e))*dy/sqrt(dy*dy+e*e);
+		obj[i].Vy *= sqrt(G*(obj[0].m/obj[i].m)/sqrt(dx*dx+e*e))*dx/sqrt(dx*dx+e*e);
+		obj[i].Vx *= -sqrt(G*(obj[0].m/obj[i].m)/sqrt(dy*dy+e*e))*dy/sqrt(dy*dy+e*e);
 		cout<<"Body "<<i<<"\n\tm: "<<obj[i].m<<"\n\tX,Y: "<<obj[i].X<<","<<obj[i].Y<<"\n\tVx,Vy: "<<obj[i].Vx<<","<<obj[i].Vy<<"\n\tState: "<<obj[i].state<<"\n";
-		cpgpt(1,&obj[i].X,&obj[i].Y,2);
+		//cpgpt(1,&obj[i].X,&obj[i].Y,2);
 	}
 	
 	//##### Loop calculations ######
-	for(i=0; i<10000000; i++) { //using leapfrog method to calculate orbit
-		for(j=1;j<N;j++) { //pick body affected
+	for(i=0; i<10000000; i++) {
+		for(j=1;j<N;j++) { //pick body affected, start at 1 as black hole is not moving
 		if(obj[j].state == false) continue;
+		cpgsci(0); //erase curent position before drawing next one
+		cpgpt(1,&obj[j].X,&obj[j].Y,17);
 			for(k=0;k<N;k++) { //pick body acting on selected one
 				if(j==k) continue; //skip itself
-				if(obj[k].state == false) continue;
+				if(obj[k].state == false) continue; //skip dead stars that have been absorbed in collisions
+				
 				//Leapfrog with position first
 				
 				obj[j].X += (dt/2)*obj[j].Vx;
@@ -69,15 +74,16 @@ int main() {
 				dy = obj[j].Y-obj[k].Y;
 				
 				
-				obj[j].R = sqrt( e*e + dx*dx + dy*dy ); //add e^e to prevent R from being zero, prevents slingshotting
-				if(k == 0) {
-					if(obj[j].R <= 0.15) {
+				obj[j].R = sqrt( dx*dx + dy*dy ); //add e^e to prevent R from being zero, prevents zero division
+				
+				if(k == 0) { //VERY BASIC COLLISION HANDLING - NEEDS WORK
+					if(obj[j].R <= 0.2) {
 						obj[j].collision(obj[k]);
 						cout<<"Collision between "<<j<<" and "<<k<<"\n";
 						continue;
 					}
 					else {
-						if(obj[j].R <= 0.05) {
+						if(obj[j].R <= 0.15) {
 							obj[j].collision(obj[k]);
 							cout<<"Collision between "<<j<<" and "<<k<<"\n";
 							continue;
@@ -96,13 +102,12 @@ int main() {
 				obj[j].X += (dt/2)*obj[j].Vx;
 				obj[j].Y += (dt/2)*obj[j].Vy;
 			} //END CALCULATION GROUP
-			//cpgeras();
-			if(obj[j].state == true) {
+			if(obj[j].state == true) { //only draw living bodies, not those absorbed by collisions
 				cpgsci(obj[j].colour); //follows colour of the given body
-				cpgpt(1,&obj[j].X,&obj[j].Y,1); //draw the current position as a point
+				cpgpt(1,&obj[j].X,&obj[j].Y,17); //draw the current position as a point
 			}
 		} //END BODY CHOOSING LOOP
-		usleep(50000);
+		usleep(500); //slows down plotting so orbits can be traced at a relatively easy to see speed
 	} //END MAIN LOOP
 }
 
