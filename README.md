@@ -10,12 +10,12 @@ Work to do:
 - [x] Basic class to handle objects
 - [x] Multiple object interaction with N > 2 solar system
 - [x] Random generator for initial positions and mass
-- [X] Proper generator for initial conditions of velocity (May need some tweaking)
+- [X] Proper generator for initial conditions of velocity - *(May need some tweaking)*
 - [x] More advanced class with star colour depedent on mass, ect.
-- [ ] Collision handling between bodies (Very rare event, not a priority)
+- [ ] Collision handling between bodies - *(Very rare event, not a priority)*
 - [x] Simple approximation of dark halo
 - [ ] Implementation of dark halo - *Working on*
-- [ ] Advanced plotting using Python and matplotlib (May be scraped)
+- [ ] Advanced plotting using Python and matplotlib - *(May be scraped)*
 - [ ] Implementation of Barnes-Hut approximation to simply calculations
 - [X] Galaxy of N > 100
 - [ ] Galaxy of N > 1000
