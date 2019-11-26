@@ -5,21 +5,25 @@
 #include<cstdlib>
 #include"celestial.h"
 
+//WORK ON VARIABLE TIME STEP TO AVOID SLINGSHOTTING
+
 using namespace std;
 int rand();
 float Random(float a, float b); //random function created to help simplify code
 
 int main() {
 
-	const float G=1.0, M=1.0;
+	//const float G=1.0, M=1.0;
 	//const float G=6.67e-11, M=2.0e30, AU=1.5e11, SecYear=3.154e7; // real constants
+	const float G=1.0, M=1.0, AU=1.0, SecYear=1.0;
 	//const float GM = 4*M_PI*M_PI, M=2.0e30; //derived from Kepler's Laws
-	int nIter = 1000,i,j,k,numOrb=0,N=30; //number of iterations per circle, loop iterator, number of orbits
+	int i,j,k,N=100; //number of iterations per circle, loop iterator, number of orbits
 	float tempY; //for number of orbits
-	float dt = 0.001; //time step
+	float dt = 0.1; //time step
 	float dx,dy,a;
 	float e = 0.001; //offset to avoid zero division
-	float scale = 200.0; //scale of graph
+	float scale = 2000.0*N/10.0; //scale of graph
+	float totMass = 0.0,adjust=3.0;
 
 	//##### Set up plot window #####
 	if(!cpgopen("/XWINDOW")) return 1; //open window
@@ -30,7 +34,7 @@ int main() {
 	
 	celestial obj[N]; //create array of bodies using self made Celestial class
 	
-	obj[0].m = 1000.0; //supermassive blackhole at centre of galaxy, do not move it
+	obj[0].m = 1000.0*M; //supermassive blackhole at centre of galaxy, do not move it
 	obj[0].X = 0.0;
 	obj[0].Y = 0.0;
 	obj[0].state = true;
@@ -41,19 +45,21 @@ int main() {
 	
 	for(i=1; i<N; i++) {
 		obj[i].state = true;
-		obj[i].m = Random(0.25, 3.0);
+		obj[i].m = Random(0.25, 3.0)*M;
+		totMass+=obj[i].m;
 		obj[i].updateCol();
-		obj[i].X = Random(-100.0, 100.0);
-		obj[i].Y = Random(-100.0, 100.0);
-		obj[i].Vx = Random(0.10, 0.15); //variation in velocitiese, also corrects for exceptionally high initial conditions
-		obj[i].Vy = Random(0.10, 0.15);
+		obj[i].X = Random(-400.0, 400.0)*N/5.0;
+		obj[i].Y = Random(-400.0, 400.0)*N/5.0;
+		obj[i].Vx = Random(0.1,0.2)*adjust; //variation in velocitiese, also corrects for exceptionally high initial conditions
+		obj[i].Vy = Random(0.1,0.2)*adjust;
 		dx = obj[i].X-obj[0].X; //first body
 		dy = obj[i].Y-obj[0].Y;
-		obj[i].Vy *= sqrt(G*(obj[0].m/obj[i].m)/sqrt(dx*dx+e*e))*dx/sqrt(dx*dx+e*e);
-		obj[i].Vx *= -sqrt(G*(obj[0].m/obj[i].m)/sqrt(dy*dy+e*e))*dy/sqrt(dy*dy+e*e);
+		obj[i].Vy *= sqrt(G*(obj[0].m*obj[i].m)/sqrt(dx*dx+e*e))*dx/sqrt(dx*dx+e*e);
+		obj[i].Vx *= -sqrt(G*(obj[0].m*obj[i].m)/sqrt(dy*dy+e*e))*dy/sqrt(dy*dy+e*e);
 		cout<<"Body "<<i<<"\n\tm: "<<obj[i].m<<"\n\tX,Y: "<<obj[i].X<<","<<obj[i].Y<<"\n\tVx,Vy: "<<obj[i].Vx<<","<<obj[i].Vy<<"\n\tState: "<<obj[i].state<<"\n";
 		//cpgpt(1,&obj[i].X,&obj[i].Y,2);
 	}
+	cout<<totMass<<"\n";
 	
 	//##### Loop calculations ######
 	for(i=0; i<10000000; i++) {
@@ -73,25 +79,27 @@ int main() {
 				dx = obj[j].X-obj[k].X;
 				dy = obj[j].Y-obj[k].Y;
 				
-				
+				a=0.0;
 				obj[j].R = sqrt( dx*dx + dy*dy ); //add e^e to prevent R from being zero, prevents zero division
 				
 				if(k == 0) { //VERY BASIC COLLISION HANDLING - NEEDS WORK
-					if(obj[j].R <= 0.2) {
+					if(obj[j].R <= 0.5*AU) {
 						obj[j].collision(obj[k]);
 						cout<<"Collision between "<<j<<" and "<<k<<"\n";
 						continue;
+						}
+						a=-0.00005*sqrt(obj[j].R); //very basic approximation o fthe dark matter halo
 					}
 					else {
-						if(obj[j].R <= 0.15) {
+						if(obj[j].R <= 0.1*AU) {
 							obj[j].collision(obj[k]);
 							cout<<"Collision between "<<j<<" and "<<k<<"\n";
 							continue;
 						}
 					}
-				}
 				
-				a = -G*(obj[k].m/obj[j].m)/(obj[j].R*obj[j].R);
+				
+				a += -G*(obj[k].m/*obj[j].m*/)/(obj[j].R*obj[j].R);
 				
 				obj[j].aX = a * dx / obj[j].R;
 				obj[j].aY = a * dy / obj[j].R;
@@ -107,7 +115,7 @@ int main() {
 				cpgpt(1,&obj[j].X,&obj[j].Y,17); //draw the current position as a point
 			}
 		} //END BODY CHOOSING LOOP
-		usleep(500); //slows down plotting so orbits can be traced at a relatively easy to see speed
+		//usleep(500); //slows down plotting so orbits can be traced at a relatively easy to see speed
 	} //END MAIN LOOP
 }
 
