@@ -14,12 +14,12 @@ Work to do:
 - [x] More advanced class with star colour depedent on mass, ect.
 - [ ] Collision handling between bodies - *(Very rare event, not a priority)*
 - [x] Simple approximation of dark halo
-- [ ] Implementation of dark halo - *Working on*
+- [X] Implementation of dark halo - *(Working, may need tweaking in future)*
 - [ ] Advanced plotting using Python and matplotlib - *(May be scraped)*
 - [ ] Implementation of Barnes-Hut approximation to simply calculations
 - [X] Galaxy of N > 100
 - [ ] Galaxy of N > 1000
 - [ ] Galaxy of N = 1 000 000
 
-Current progress is a small galaxy with 100 objects in orbit around a supermassive black hole. Red is small mass stars, yellow is medium sized ones. The graph draws the orbits with individual points, currently showing the supermassive black hole at the center as purple.
-![November 26th Progress](https://github.com/brlnoble/SolarSimulation/blob/master/November_26_2019.PNG?raw=true)
+Current progress is a small galaxy with 500 objects in orbit. Red is small mass stars, yellow is medium sized ones. The graph draws the orbits with individual points, currently with a low level approximtion for the dark halo. 
+![November 27th Progress](https://github.com/brlnoble/SolarSimulation/blob/master/November_27_2019.PNG?raw=true)
