@@ -15,11 +15,11 @@ float Random(float a, float b); //random function created to help simplify code
 int main() {
 	//const float G=6.67e-11, M=2.0e30, AU=1.5e11, SecYear=3.154e7; // real constants
 	const float G=1.0, M=1.0, AU=1.0, SecYear=1.0;
-	int i,j,k,N=100; //number of iterations per circle, loop iterator, number of orbits
+	int i,j,k,N=500; //number of iterations per circle, loop iterator, number of orbits
 	float dt = 0.2; //time step
 	float dx,dy,a,e=0.001; //e is to prevent 0 division
-	float scale = 2000.0*N/10.0; //scale of graph, follows number of bodies present
-	float adjust=3.0; //adjusts the velocity generator, needs tweaking depending on number of bodies present
+	float scale = 2000.0*N/5.0; //scale of graph, follows number of bodies present
+	float adjust=0.04; //adjusts the velocity generator, needs tweaking depending on number of bodies present
 
 	//##### Set up plot window #####
 	if(!cpgopen("/XWINDOW")) return 1; //open window
@@ -43,12 +43,12 @@ int main() {
 		obj[i].updateCol();
 		obj[i].X = Random(-400.0, 400.0)*(N/5.0); //scales with number of bodies to help space them out
 		obj[i].Y = Random(-400.0, 400.0)*(N/5.0);
-		obj[i].Vx = Random(0.1,0.2)*adjust; //variation in velocitiese, also corrects for exceptionally high initial conditions
-		obj[i].Vy = Random(0.1,0.2)*adjust;
-		dx = obj[i].X-obj[0].X; 
-		dy = obj[i].Y-obj[0].Y;
-		obj[i].Vy *= sqrt(G*(obj[0].m*obj[i].m)/sqrt(dx*dx+e*e))*dx/sqrt(dx*dx+e*e);
-		obj[i].Vx *= -sqrt(G*(obj[0].m*obj[i].m)/sqrt(dy*dy+e*e))*dy/sqrt(dy*dy+e*e);
+		obj[i].Vx = adjust; //variation in velocitiese, also corrects for exceptionally high initial conditions
+		obj[i].Vy = adjust;
+		dx = obj[i].X; 
+		dy = obj[i].Y;
+		obj[i].Vy *= sqrt(G*(obj[i].haloMass()*obj[i].m)/sqrt(dx*dx+e*e))*(dx/sqrt(dx*dx+e*e));
+		obj[i].Vx *= -sqrt(G*(obj[i].haloMass()*obj[i].m)/sqrt(dy*dy+e*e))*(dy/sqrt(dy*dy+e*e));
 		//cout<<"Body "<<i<<"\n\tm: "<<obj[i].m<<"\n\tX,Y: "<<obj[i].X<<","<<obj[i].Y<<"\n\tVx,Vy: "<<obj[i].Vx<<","<<obj[i].Vy<<"\n\tState: "<<obj[i].state<<"\n";
 		//cpgpt(1,&obj[i].X,&obj[i].Y,2); //draw initial positions
 	}
@@ -56,9 +56,9 @@ int main() {
 	//##### Loop calculations ######
 	for(i=0; i<10000000; i++) { //runs for an excessively long time
 		for(j=1;j<N;j++) { //pick body affected, start at 1 as black hole is not moving
-		if(obj[j].state == false) continue; //skip dead objects, happens with collisions
-		cpgsci(0); //erase curent position before drawing next one
-		cpgpt(1,&obj[j].X,&obj[j].Y,17);
+			if(obj[j].state == false) continue; //skip dead objects, happens with collisions
+			cpgsci(0); //erase curent position before drawing next one
+			cpgpt(1,&obj[j].X,&obj[j].Y,17);
 		
 			for(k=0;k<N;k++) { //pick body acting on selected one
 				if(j==k) continue; //skip itself
@@ -81,7 +81,6 @@ int main() {
 						cout<<"Collision between "<<j<<" and "<<k<<"\n";
 						continue;
 						}
-						a=-0.00005*sqrt(obj[j].R); //very basic approximation o fthe dark matter halo
 					}
 					else { //other body collision
 						if(obj[j].R <= 0.1*AU) {
@@ -93,6 +92,9 @@ int main() {
 				
 				
 				a += -G*(obj[k].m*obj[j].m)/(obj[j].R*obj[j].R);
+				if(k==0) { //dark matter approximation
+					a = -G*(obj[j].haloMass()*obj[j].m)/(obj[j].R*obj[j].R);
+				}
 				
 				obj[j].aX = a * dx / obj[j].R;
 				obj[j].aY = a * dy / obj[j].R;
