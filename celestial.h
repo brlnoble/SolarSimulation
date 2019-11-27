@@ -1,3 +1,4 @@
+#include<cmath>
 class celestial {
 public:
 
@@ -21,15 +22,19 @@ public:
 			bod.state = false;
 			m += bod.m;
 			updateCol();
-			//Vx -= bod.Vx*(X/R); not being used, to be fixed later
+			//Vx -= bod.Vx*(X/R);
 			//Vy -= bod.Vy*(Y/R);
 		}
 		else {
 			state = false;
 			bod.m += m;
 			bod.updateCol();
-			//bod.Vx -= Vx*(X/R); not being used, to be fixed later
+			//bod.Vx -= Vx*(X/R);
 			//bod.Vy -= Vy*(Y/R);
 		}
+	};
+	float haloMass() {
+		float r = sqrt(X*X + Y*Y);
+		return 0.05*r*r+1000.0;
 	};
 };
