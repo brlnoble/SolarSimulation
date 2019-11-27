@@ -15,11 +15,11 @@ float Random(float a, float b); //random function created to help simplify code
 int main() {
 	//const float G=6.67e-11, M=2.0e30, AU=1.5e11, SecYear=3.154e7; // real constants
 	const float G=1.0, M=1.0, AU=1.0, SecYear=1.0;
-	int i,j,k,N=500; //number of iterations per circle, loop iterator, number of orbits
-	float dt = 0.2; //time step
+	int i,j,k,N=1000; //number of iterations per circle, loop iterator, number of orbits
+	float dt = 1; //time step
 	float dx,dy,a,e=0.001; //e is to prevent 0 division
 	float scale = 2000.0*N/5.0; //scale of graph, follows number of bodies present
-	float adjust=0.04; //adjusts the velocity generator, needs tweaking depending on number of bodies present
+	float adjust=0.02; //adjusts the velocity generator, needs tweaking depending on number of bodies present
 
 	//##### Set up plot window #####
 	if(!cpgopen("/XWINDOW")) return 1; //open window
@@ -27,17 +27,8 @@ int main() {
 	cpglab("x (AU)","y (AU)","Galaxy System Test");
 	
 	//###### Set up Initial Conditions Here #####
-	celestial obj[N]; //create array of bodies using self made Celestial class
-	
-	obj[0].m = 1000.0*M; //supermassive blackhole at centre of galaxy, do not move it
-	obj[0].X = 0.0;
-	obj[0].Y = 0.0;
-	obj[0].state = true;
-	
-	cpgsci(6); //draw blackhole position
-	cpgpt(1, &obj[0].X, &obj[0].Y,23);
-	
-	for(i=1; i<N; i++) { //create rest of objects
+	celestial obj[N]; //create array of bodies using self made Celestial class	
+	for(i=0; i<N; i++) { //create rest of objects
 		obj[i].state = true;
 		obj[i].m = Random(0.25, 3.0)*M;
 		obj[i].updateCol();
@@ -55,10 +46,30 @@ int main() {
 	
 	//##### Loop calculations ######
 	for(i=0; i<10000000; i++) { //runs for an excessively long time
-		for(j=1;j<N;j++) { //pick body affected, start at 1 as black hole is not moving
+		for(j=0;j<N;j++) { //pick body affected, start at 1 as black hole is not moving
 			if(obj[j].state == false) continue; //skip dead objects, happens with collisions
 			cpgsci(0); //erase curent position before drawing next one
 			cpgpt(1,&obj[j].X,&obj[j].Y,17);
+			
+			//Dark halo approximation
+				obj[j].X += (dt/2)*obj[j].Vx;
+				obj[j].Y += (dt/2)*obj[j].Vy;
+				
+				dx = obj[j].X;
+				dy = obj[j].Y;
+
+				obj[j].R = sqrt( dx*dx + dy*dy ); //add e^e to prevent R from being zero, prevents zero division			
+				a = -G*(obj[j].haloMass()*obj[j].m)/(obj[j].R*obj[j].R);
+				
+				obj[j].aX = a * dx / obj[j].R;
+				obj[j].aY = a * dy / obj[j].R;
+				
+				obj[j].Vx += obj[j].aX*dt;
+				obj[j].Vy += obj[j].aY*dt;
+				
+				obj[j].X += (dt/2)*obj[j].Vx;
+				obj[j].Y += (dt/2)*obj[j].Vy;
+			
 		
 			for(k=0;k<N;k++) { //pick body acting on selected one
 				if(j==k) continue; //skip itself
@@ -72,29 +83,15 @@ int main() {
 				dx = obj[j].X-obj[k].X;
 				dy = obj[j].Y-obj[k].Y;
 				
-				a=0.0;
 				obj[j].R = sqrt( dx*dx + dy*dy ); //add e^e to prevent R from being zero, prevents zero division
 				
-				if(k == 0) { //VERY BASIC COLLISION HANDLING - NEEDS WORK
-					if(obj[j].R <= 0.5*AU) { //black hole collision
-						obj[j].collision(obj[k]);
-						cout<<"Collision between "<<j<<" and "<<k<<"\n";
-						continue;
-						}
-					}
-					else { //other body collision
-						if(obj[j].R <= 0.1*AU) {
+				if(obj[j].R <= 0.1*AU) {
 							obj[j].collision(obj[k]);
 							cout<<"Collision between "<<j<<" and "<<k<<"\n";
 							continue;
-						}
-					}
+				}				
 				
-				
-				a += -G*(obj[k].m*obj[j].m)/(obj[j].R*obj[j].R);
-				if(k==0) { //dark matter approximation
-					a = -G*(obj[j].haloMass()*obj[j].m)/(obj[j].R*obj[j].R);
-				}
+				a = -G*(obj[k].m*obj[j].m)/(obj[j].R*obj[j].R);
 				
 				obj[j].aX = a * dx / obj[j].R;
 				obj[j].aY = a * dy / obj[j].R;
