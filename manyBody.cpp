@@ -1,11 +1,12 @@
 #include<cpgplot.h>
 #include<iostream>
 #include<cmath>
-#include<unistd.h>
+//#include<unistd.h>
 #include<cstdlib>
 #include"celestial.h"
 
 //WORK ON VARIABLE TIME STEP TO AVOID SLINGSHOTTING
+//WORK ON DARK HALO APPROXIMATION
 
 using namespace std;
 int rand();
@@ -15,12 +16,10 @@ int main() {
 	//const float G=6.67e-11, M=2.0e30, AU=1.5e11, SecYear=3.154e7; // real constants
 	const float G=1.0, M=1.0, AU=1.0, SecYear=1.0;
 	int i,j,k,N=100; //number of iterations per circle, loop iterator, number of orbits
-	float tempY; //for number of orbits
-	float dt = 0.1; //time step
-	float dx,dy,a;
-	float e = 0.001; //offset to avoid zero division
-	float scale = 2000.0*N/10.0; //scale of graph
-	float totMass = 0.0,adjust=3.0;
+	float dt = 0.2; //time step
+	float dx,dy,a,e=0.001; //e is to prevent 0 division
+	float scale = 2000.0*N/10.0; //scale of graph, follows number of bodies present
+	float adjust=3.0; //adjusts the velocity generator, needs tweaking depending on number of bodies present
 
 	//##### Set up plot window #####
 	if(!cpgopen("/XWINDOW")) return 1; //open window
@@ -28,8 +27,6 @@ int main() {
 	cpglab("x (AU)","y (AU)","Galaxy System Test");
 	
 	//###### Set up Initial Conditions Here #####
-	
-	
 	celestial obj[N]; //create array of bodies using self made Celestial class
 	
 	obj[0].m = 1000.0*M; //supermassive blackhole at centre of galaxy, do not move it
@@ -39,12 +36,10 @@ int main() {
 	
 	cpgsci(6); //draw blackhole position
 	cpgpt(1, &obj[0].X, &obj[0].Y,23);
-	cpgsci(1);
 	
 	for(i=1; i<N; i++) { //create rest of objects
 		obj[i].state = true;
 		obj[i].m = Random(0.25, 3.0)*M;
-		totMass+=obj[i].m;
 		obj[i].updateCol();
 		obj[i].X = Random(-400.0, 400.0)*(N/5.0); //scales with number of bodies to help space them out
 		obj[i].Y = Random(-400.0, 400.0)*(N/5.0);
@@ -54,13 +49,12 @@ int main() {
 		dy = obj[i].Y-obj[0].Y;
 		obj[i].Vy *= sqrt(G*(obj[0].m*obj[i].m)/sqrt(dx*dx+e*e))*dx/sqrt(dx*dx+e*e);
 		obj[i].Vx *= -sqrt(G*(obj[0].m*obj[i].m)/sqrt(dy*dy+e*e))*dy/sqrt(dy*dy+e*e);
-		cout<<"Body "<<i<<"\n\tm: "<<obj[i].m<<"\n\tX,Y: "<<obj[i].X<<","<<obj[i].Y<<"\n\tVx,Vy: "<<obj[i].Vx<<","<<obj[i].Vy<<"\n\tState: "<<obj[i].state<<"\n";
+		//cout<<"Body "<<i<<"\n\tm: "<<obj[i].m<<"\n\tX,Y: "<<obj[i].X<<","<<obj[i].Y<<"\n\tVx,Vy: "<<obj[i].Vx<<","<<obj[i].Vy<<"\n\tState: "<<obj[i].state<<"\n";
 		//cpgpt(1,&obj[i].X,&obj[i].Y,2); //draw initial positions
 	}
-	cout<<totMass<<"\n";
 	
 	//##### Loop calculations ######
-	for(i=0; i<10000000; i++) {
+	for(i=0; i<10000000; i++) { //runs for an excessively long time
 		for(j=1;j<N;j++) { //pick body affected, start at 1 as black hole is not moving
 		if(obj[j].state == false) continue; //skip dead objects, happens with collisions
 		cpgsci(0); //erase curent position before drawing next one
@@ -109,6 +103,7 @@ int main() {
 				obj[j].X += (dt/2)*obj[j].Vx;
 				obj[j].Y += (dt/2)*obj[j].Vy;
 			} //END CALCULATION GROUP
+			
 			if(obj[j].state == true) { //only draw living bodies, not those absorbed by collisions
 				cpgsci(obj[j].colour); //follows colour of the given body
 				cpgpt(1,&obj[j].X,&obj[j].Y,17); //draw the current position as a point
