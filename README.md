@@ -18,8 +18,8 @@ Work to do:
 - [ ] Advanced plotting using Python and matplotlib - *(May be scraped)*
 - [ ] Implementation of Barnes-Hut approximation to simply calculations
 - [X] Galaxy of N > 100
-- [ ] Galaxy of N > 1000
+- [X] Galaxy of N > 1000
 - [ ] Galaxy of N = 1 000 000
 
-Current progress is a small galaxy with 500 objects in orbit. Red is small mass stars, yellow is medium sized ones. The graph draws the orbits with individual points, currently with a low level approximtion for the dark halo. 
-![November 27th Progress](https://github.com/brlnoble/SolarSimulation/blob/master/November_27_2019.PNG?raw=true)
+Current progress is a small galaxy with 1000 objects in orbit. Red is small mass stars, yellow is medium sized ones. The graph draws the orbits with individual points, currently with a low level approximtion for the dark halo. 
+![November 28th Progress](https://github.com/brlnoble/SolarSimulation/blob/master/November_28_2019.PNG?raw=true)
