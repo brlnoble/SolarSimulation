@@ -2,7 +2,7 @@
 #include<iostream>
 #include<cmath>
 #include<cstdlib>
-#include"celestial.h"
+#include"celestial.h" //custom class made by me
 
 
 using namespace std;
@@ -17,8 +17,8 @@ int main() {
 	int i,j,k,N=1000; //loop iterators and number of bodies
 	float dt = 1; //time step
 	float dx,dy,a,e=0.001; //e is to prevent 0 division
-	float scale = 2000.0*N/7.0; //scale of graph, follows number of bodies present
-	float adjust=0.007; //adjusts the velocity generator to prevent slingshot orbits
+	float scale = 2000.0*N/10.0; //scale of graph, follows number of bodies present
+	float adjust=0.025; //adjusts the velocity generator to prevent slingshot orbits
 	//float angMom=0.0,angMomI=0.0; //used for testing angular momentum
 
 
@@ -33,16 +33,17 @@ int main() {
 	celestial obj[N]; //create array of bodies using self made Celestial class	
 	for(i=0; i<N; i++) { //create rest of objects
 		obj[i].state = true;
-		obj[i].m = Random(0.25, 3.0)*M;
+		obj[i].m = Random(0.25, 6.0)*M;
 		obj[i].updateCol();
-		obj[i].X = posOrNeg()*Random( 50.0, 500.0)*(N/5.0); //scales with number of bodies to help space them out
-		obj[i].Y = posOrNeg()*sqrt(500.0*500.0*(N*N/25.0)-obj[i].X*obj[i].X)*Random(0.1, 1.0);//*Random( 10.0, 500.0)*(N/5.0);
+		obj[i].X = posOrNeg()*Random(50.0, 500.0)*(N/5.0); //scales with number of bodies to help space them out
+		obj[i].Y = posOrNeg()*sqrt(500.0*500.0*(N*N/25.0)-obj[i].X*obj[i].X)*Random(0.1, 1.0);
 		obj[i].Vx = adjust; //variation in velocitiese, also corrects for exceptionally high initial conditions
 		obj[i].Vy = adjust;
 		dx = obj[i].X; 
 		dy = obj[i].Y;
-		obj[i].Vy *= sqrt(G*(obj[i].haloMass()*obj[i].m)/sqrt(dx*dx+e*e))*(dx/sqrt(dx*dx+e*e));
-		obj[i].Vx *= -sqrt(G*(obj[i].haloMass()*obj[i].m)/sqrt(dy*dy+e*e))*(dy/sqrt(dy*dy+e*e));
+		obj[i].R = sqrt(dx*dx+dy*dy+e*e);
+		obj[i].Vy *= sqrt(G*(obj[i].haloMass())/obj[i].R)*(dx/sqrt(dx*dx+e*e));
+		obj[i].Vx *= -sqrt(G*(obj[i].haloMass())/obj[i].R)*(dy/sqrt(dy*dy+e*e));
 		//cout<<"Body "<<i<<"\n\tm: "<<obj[i].m<<"\n\tX,Y: "<<obj[i].X<<","<<obj[i].Y<<"\n\tVx,Vy: "<<obj[i].Vx<<","<<obj[i].Vy<<"\n\tState: "<<obj[i].state<<"\n";
 		cpgsci(obj[i].colour); //follows colour of the given body
 		cpgpt(1,&obj[i].X,&obj[i].Y,17); //draw the current position as a point
@@ -58,15 +59,15 @@ int main() {
 			cpgsci(0); //erase curent position before drawing next one
 			cpgpt(1,&obj[j].X,&obj[j].Y,17);
 			
-			//Dark halo approximation
+			//----Dark halo approximation----
 				obj[j].X += (dt/2)*obj[j].Vx;
 				obj[j].Y += (dt/2)*obj[j].Vy;
 				
 				dx = obj[j].X;
 				dy = obj[j].Y;
 
-				obj[j].R = sqrt( dx*dx + dy*dy + e*e); //add e^e to prevent R from being zero, prevents zero division			
-				a = -G*(obj[j].haloMass()*obj[j].m)/(obj[j].R*obj[j].R);
+				obj[j].R = sqrt( dx*dx + dy*dy + e*e); //add e^e to prevent R from being zero, avoids zero division			
+				a = -G*(obj[j].haloMass())/(obj[j].R*obj[j].R);
 				
 				obj[j].aX = a * dx / obj[j].R;
 				obj[j].aY = a * dy / obj[j].R;
@@ -90,7 +91,7 @@ int main() {
 				dx = obj[j].X-obj[k].X;
 				dy = obj[j].Y-obj[k].Y;
 				
-				obj[j].R = sqrt( dx*dx + dy*dy + e*e); //add e^e to prevent R from being zero, prevents zero division
+				obj[j].R = sqrt( dx*dx + dy*dy + e*e); //add e^e to prevent R from being zero, avoids zero division
 				
 				if(obj[j].R <= 1.0) { //handles the very rare event of a collision
 							obj[j].collision(obj[k]);
@@ -98,7 +99,7 @@ int main() {
 							continue;
 				}				
 				
-				a = -G*(obj[k].m*obj[j].m)/(obj[j].R*obj[j].R);
+				a = -G*(obj[k].m)/(obj[j].R*obj[j].R);
 				
 				obj[j].aX = a * dx / obj[j].R;
 				obj[j].aY = a * dy / obj[j].R;
@@ -123,13 +124,13 @@ int main() {
 
 //------- Random Generator -------
 
-float Random(float a, float b) {
+float Random(float a, float b) { //returns random value bwteen a and b
 	float r = ( (float) rand() ) / ( (float) RAND_MAX );
 	float range = b - a;
 	return r*range + a;
 }
 
-int posOrNeg() {
+int posOrNeg() { //return either -1 or +1, used for initial position generation
 	int x = rand()%2;
 	return -2*x+1;
 }
