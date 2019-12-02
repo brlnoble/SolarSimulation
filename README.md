@@ -12,7 +12,7 @@ Work to do:
 - [x] Random generator for initial positions and mass
 - [X] Proper generator for initial conditions of velocity - *(May need some tweaking)*
 - [x] More advanced class with star colour depedent on mass, ect.
-- [ ] Collision handling between bodies - *(Very rare event, not a priority)*
+- [X] Collision handling between bodies - *(Very rare event, very simple collisions handled)*
 - [x] Simple approximation of dark halo
 - [X] Implementation of dark halo - *(Working, may need tweaking in future)*
 - [ ] Advanced plotting using Python and matplotlib - *(May be scraped)*
@@ -21,5 +21,5 @@ Work to do:
 - [X] Galaxy of N > 1000
 - [ ] Galaxy of N = 1 000 000
 
-Current progress is a small galaxy with 1000 objects in orbit. Red is small mass stars, yellow is medium sized ones. The graph draws the orbits with individual points, currently with a low level approximtion for the dark halo. 
-![November 28th Progress](https://github.com/brlnoble/SolarSimulation/blob/master/November_28_2019.PNG?raw=true)
+Current progress is a small galaxy with 1000 objects in orbit. Red is small mass stars, yellow is medium sized ones, blue are high mass stars. The graph draws the orbits with individual points, currently with a low level approximtion for the dark halo. Below is a picture of the galaxy after a long duration of the simulation.
+![Final Progress](https://github.com/brlnoble/SolarSimulation/blob/master/Long_Life_Elliptical.PNG?raw=true)
