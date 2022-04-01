@@ -22,4 +22,5 @@ Work to do:
 - [ ] Galaxy of N = 1 000 000
 
 Current progress is a small galaxy with 1000 objects in orbit. Red is small mass stars, yellow is medium sized ones, blue are high mass stars. The graph draws the orbits with individual points, currently with a low level approximtion for the dark halo. Below is a picture of the galaxy after a long duration of the simulation.
+
 ![Final Progress](https://github.com/brlnoble/SolarSimulation/blob/master/Long_Life_Elliptical.PNG?raw=true)
